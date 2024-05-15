@@ -1,0 +1,18 @@
+name: Check Feature Flag Status
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  check_feature_flag_status:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check Feature Flag Status
+        run: |
+          FLAG_STATUS=$(curl -H "Authorization: api-e97b27cb-a2bb-4928-a864-d01374b489d3" \
+                          "https://app.launchdarkly.com/api/v2/flags/sdk-79037d1d-f7c5-4380-ba2a-9f0611717500/Status_Flag")
+          FLAG_ENABLED=$(echo $FLAG_STATUS | jq -r '.enabled')
+          echo "Feature Flag Status: $FLAG_ENABLED"
