@@ -18,9 +18,9 @@ jobs:
         id: evaluate
         uses: launchdarkly/gha-flags@main
         with:
-          sdk-key: ${{ secrets.sdk-79037d1d-f7c5-4380-ba2a-9f0611717500 }}
-
+          sdk-key: sdk-79037d1d-f7c5-4380-ba2a-9f0611717500
           flags: |
             Status_Flag
+
 
 
