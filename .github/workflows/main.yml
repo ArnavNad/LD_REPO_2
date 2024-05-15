@@ -1,4 +1,4 @@
-name: Check Feature Flag Status
+name: LaunchDarkly Flag Evaluation
 
 on:
   push:
@@ -6,18 +6,20 @@ on:
       - main
 
 jobs:
-  check_feature_flag_status:
+  evaluate_flag:
+    name: Evaluate LaunchDarkly Flag
     runs-on: ubuntu-latest
 
+    outputs:
+      flag_status: ${{ steps.evaluate.outputs.flag_status }}
+
     steps:
-      - name: Fetch Feature Flag Status
-        run: |
-          FLAG_STATUS=$(curl -s -H "Authorization: sdk-79037d1d-f7c5-4380-ba2a-9f0611717500" \
-                          "https://app.launchdarkly.com/api/v2/flags/default/Status_Flag")
-          if [ "$FLAG_STATUS" == "null" ]; then
-            echo "Error: Feature flag status is null. Please check your API key, project key, and flag key."
-            exit 1
-          fi
-          FLAG_ENABLED=$(echo $FLAG_STATUS | jq -r '.enabled')
-          echo "Feature Flag Status: $FLAG_ENABLED"
+      - name: Evaluate LaunchDarkly Flag
+        id: evaluate
+        uses: launchdarkly/gha-flags@main
+        with:
+          sdk-key: ${{ secrets.sdk-79037d1d-f7c5-4380-ba2a-9f0611717500 }}
+          flags: |
+            Status_Flag
+
 
