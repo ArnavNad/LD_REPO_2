@@ -1,4 +1,4 @@
-name: LaunchDarkly Flag Evaluation
+name: Check Feature Flag Status
 
 on:
   push:
@@ -6,21 +6,16 @@ on:
       - main
 
 jobs:
-  evaluate_flag:
-    name: Evaluate LaunchDarkly Flag
+  check_feature_flag_status:
     runs-on: ubuntu-latest
 
-    outputs:
-      flag_status: ${{ steps.evaluate.outputs.flag_status }}
-
     steps:
-      - name: Evaluate LaunchDarkly Flag
-        id: evaluate
-        uses: launchdarkly/gha-flags@main
-        with:
-          sdk-key: sdk-79037d1d-f7c5-4380-ba2a-9f0611717500
-          flags: |
-            Status_Flag
+      - name: Fetch Feature Flag Status
+        run: |
+          FLAG_STATUS=$(curl -s -H "Authorization: sdk-79037d1d-f7c5-4380-ba2a-9f0611717500" \
+                          "https://app.launchdarkly.com/api/v2/flags/default/Status_Flag")
+          FLAG_ENABLED=$(echo $FLAG_STATUS | jq -r '.enabled')
+          echo "Feature Flag Status: $FLAG_ENABLED"
 
 
 
