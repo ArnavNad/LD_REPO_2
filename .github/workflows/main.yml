@@ -22,12 +22,17 @@ jobs:
         run: |
           pip install launchdarkly-server-sdk
 
-      - name: Fetch feature flag status
-        id: fetch-flag-status
-        run: |
-          FLAG_STATUS=$(python Feature_Flags_3/fetch_feature_flag_status.py | python -c "import sys, json; print(json.load(sys.stdin)['flag_value'])")
-          echo "::set-env name=FLAG_STATUS::$FLAG_STATUS"
+      - name: Evaluate LaunchDarkly flags
+        id: ld
+        uses: launchdarkly/gha-flags@v1.0.1
+        with:
+          sdk-key: ${{ secrets.LAUNCHDARKLY_SDK_KEY }}
+          flags: Status_Flag,false
 
-      - name: Send status to webhook
-        run: |
-          curl -X POST -d "{\"flag_status\": \"$FLAG_STATUS\"}" https://webhook.site/f4c87884-959d-4198-81b0-6566980e2138
+      - name: If true
+        if: fromJSON(steps.ld.outputs.Status_Flag) == true
+        run: echo "The 'Status_Flag' feature flag is true"
+
+      - name: If false
+        if: fromJSON(steps.ld.outputs.Status_Flag) == false
+        run: echo "The 'Status_Flag' feature flag is false"
