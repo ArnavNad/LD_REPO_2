@@ -25,13 +25,9 @@ jobs:
       - name: Fetch feature flag status
         id: fetch-flag-status
         run: |
-          FLAG_STATUS=$(python Feature_Flags_3/fetch_feature_flag_status.py | jq -r '.flag_value')
+          FLAG_STATUS=$(python Feature_Flags_3/fetch_feature_flag_status.py | python -c "import sys, json; print(json.load(sys.stdin)['flag_value'])")
           echo "::set-env name=FLAG_STATUS::$FLAG_STATUS"
 
       - name: Send status to webhook
         run: |
           curl -X POST -d "{\"flag_status\": \"$FLAG_STATUS\"}" https://webhook.site/f4c87884-959d-4198-81b0-6566980e2138
-
-
-
-
