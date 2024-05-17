@@ -1,4 +1,4 @@
-name: Check Feature Flag Status
+name: Update Feature Flag Status
 
 on:
   push:
@@ -6,16 +6,32 @@ on:
       - main
 
 jobs:
-  check_feature_flag_status:
+  update-feature-flag-status:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Fetch Feature Flag Status
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Install LaunchDarkly SDK
         run: |
-          FLAG_STATUS=$(curl -s -H "Authorization: sdk-79037d1d-f7c5-4380-ba2a-9f0611717500" \
-                          "https://app.launchdarkly.com/api/v2/flags/default/Status_Flag")
-          FLAG_ENABLED=$(echo $FLAG_STATUS | jq -r '.enabled')
-          echo "Feature Flag Status: $FLAG_ENABLED"
+          pip install launchdarkly-server-sdk
+
+      - name: Fetch feature flag status
+        id: fetch-flag-status
+        run: |
+          FLAG_STATUS=$(python Feature_Flags_3/fetch_feature_flag_status.py | jq -r '.flag_value')
+          echo "::set-env name=FLAG_STATUS::$FLAG_STATUS"
+
+      - name: Send status to webhook
+        run: |
+          curl -X POST -d "{\"flag_status\": \"$FLAG_STATUS\"}" https://webhook.site/f4c87884-959d-4198-81b0-6566980e2138
+
 
 
 
