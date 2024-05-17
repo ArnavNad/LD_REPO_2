@@ -1,9 +1,7 @@
-
-import os
+import json
 import ldclient
 from ldclient import Context
 from ldclient.config import Config
-from threading import Lock, Event
 
 def fetch_feature_flag_status():
     # Set sdk_key to your LaunchDarkly SDK key.
@@ -28,6 +26,10 @@ def fetch_feature_flag_status():
 
     # Print the flag value
     print("Feature flag 'Status_Flag' status:", flag_value)
+
+    # Output flag status in JSON format
+    flag_status = {"flag_value": flag_value}
+    print(json.dumps(flag_status))
 
 if __name__ == "__main__":
     fetch_feature_flag_status()
