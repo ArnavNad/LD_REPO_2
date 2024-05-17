@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+  repository_dispatch:
+    types: [flag_updated]  # Listen for webhook events from LaunchDarkly
 
 jobs:
   update-feature-flag-status:
@@ -36,3 +38,17 @@ jobs:
       - name: If false
         if: fromJSON(steps.ld.outputs.Status_Flag) == false
         run: echo "The 'Status_Flag' feature flag is false"
+
+  handle-webhook-event:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'repository_dispatch'
+
+    steps:
+      - name: Extract flag status from webhook payload
+        id: extract-flag-status
+        run: echo "::set-env name=FLAG_STATUS::${{ github.event.client_payload.flag_value }}"
+        shell: bash
+      
+      - name: Send status to webhook
+        run: |
+          curl -X POST -d "{\"flag_status\": \"$FLAG_STATUS\"}" https://webhook.site/f4c87884-959d-4198-81b0-6566980e2138
